@@ -1,0 +1,6 @@
+{
+  "/api/currencies/route": "app/api/currencies/route.js",
+  "/transactions/page": "app/transactions/page.js",
+  "/settings/currencies/page": "app/settings/currencies/page.js",
+  "/settings/currencies/edit/[id]/page": "app/settings/currencies/edit/[id]/page.js"
+}
