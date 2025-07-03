@@ -56,7 +56,6 @@ export async function createUser(
   email: string,
   password_hash: string,
   full_name?: string,
-  role: UserRole = 'member'
 ) {
   if (!sql) {
     throw new Error("Database connection not initialized");
@@ -64,7 +63,7 @@ export async function createUser(
   try {
     const data = await sql`
       INSERT INTO users (email, password_hash, full_name, role)
-      VALUES (${email}, ${password_hash}, ${full_name}, ${role})
+      VALUES (${email}, ${password_hash}, ${full_name}, 'member')
       RETURNING *
     `
 

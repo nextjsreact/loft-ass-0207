@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import { Eye, EyeOff } from "lucide-react"
@@ -25,13 +24,9 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      role: "member",
-    },
   })
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -39,7 +34,7 @@ export function RegisterForm() {
     setError("")
 
     try {
-      const result = await registerUser(data.email, data.password, data.full_name, data.role)
+      const result = await registerUser(data.email, data.password, data.full_name)
       if (result.success) {
         router.push("/dashboard")
         router.refresh()
@@ -102,21 +97,6 @@ export function RegisterForm() {
               </Button>
             </div>
             {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select onValueChange={(value) => setValue("role", value as any)} defaultValue="member">
-              <SelectTrigger>
-                <SelectValue placeholder="Select your role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="member">Member</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.role && <p className="text-sm text-red-500">{errors.role.message}</p>}
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

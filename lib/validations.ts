@@ -9,7 +9,6 @@ export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   full_name: z.string().min(1),
-  role: z.enum(['member', 'manager', 'admin']), // Role is required
 });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
