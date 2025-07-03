@@ -69,30 +69,36 @@ export async function ensureSchema() {
     `
 
     // Admin can do anything with currencies
-    await sql`DROP POLICY IF EXISTS admin_all_currencies ON currencies;`;
     await sql`
-      CREATE POLICY admin_all_currencies ON currencies
-        FOR ALL
-        TO admin
-        USING (true)
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_policy WHERE polname = 'admin_all_currencies' AND polrelid = 'currencies'::regclass) THEN
+          CREATE POLICY admin_all_currencies ON currencies FOR ALL TO admin USING (true);
+        END IF;
+      END
+      $$;
     `;
 
     // Managers can view currencies but not modify
-    await sql`DROP POLICY IF EXISTS manager_view_currencies ON currencies;`;
     await sql`
-      CREATE POLICY manager_view_currencies ON currencies
-        FOR SELECT
-        TO manager
-        USING (true)
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_policy WHERE polname = 'manager_view_currencies' AND polrelid = 'currencies'::regclass) THEN
+          CREATE POLICY manager_view_currencies ON currencies FOR SELECT TO manager USING (true);
+        END IF;
+      END
+      $$;
     `;
 
     // Members can view currencies but not modify
-    await sql`DROP POLICY IF EXISTS member_view_currencies ON currencies;`;
     await sql`
-      CREATE POLICY member_view_currencies ON currencies
-        FOR SELECT
-        TO member
-        USING (true)
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_policy WHERE polname = 'member_view_currencies' AND polrelid = 'currencies'::regclass) THEN
+          CREATE POLICY member_view_currencies ON currencies FOR SELECT TO member USING (true);
+        END IF;
+      END
+      $$;
     `
   } catch (error) {
     console.error('Schema initialization failed:', error)
