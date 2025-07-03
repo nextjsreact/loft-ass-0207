@@ -20,8 +20,18 @@ export interface Loft {
   status: LoftStatus;
   owner_id: string;
   owner_name?: string;
+  zone_area_id?: string | null;
+  zone_area_name?: string;
   company_percentage: number;
   owner_percentage: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ZoneArea {
+  id: string;
+  name: string;
+  description?: string;
   created_at: string;
   updated_at: string;
 }

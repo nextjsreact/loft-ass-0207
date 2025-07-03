@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/auth"
 import { sql, ensureSchema } from "@/lib/database"
-import type { Loft } from "@/lib/types"
+import type { Loft, LoftOwner, ZoneArea } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import Link from "next/link"
@@ -14,12 +14,21 @@ export default async function LoftsPage() {
     if (!sql) {
       throw new Error("Database connection not available")
     }
-    const lofts = (await sql`
-      SELECT l.*, lo.name as owner_name, lo.ownership_type
+    const loftsPromise = sql`
+      SELECT l.*, lo.name as owner_name, lo.ownership_type, za.name as zone_area_name
       FROM lofts l
       LEFT JOIN loft_owners lo ON l.owner_id = lo.id
+      LEFT JOIN zone_areas za ON l.zone_area_id = za.id
       ORDER BY l.created_at DESC
-    `) as Loft[]
+    `
+    const ownersPromise = sql`SELECT * FROM loft_owners ORDER BY name`
+    const zoneAreasPromise = sql`SELECT * FROM zone_areas ORDER BY name`
+
+    const [lofts, owners, zoneAreas] = (await Promise.all([
+      loftsPromise,
+      ownersPromise,
+      zoneAreasPromise,
+    ])) as [Loft[], LoftOwner[], ZoneArea[]]
 
     return (
       <div className="space-y-6">
@@ -37,15 +46,23 @@ export default async function LoftsPage() {
             </Button>
           )}
         </div>
-        <LoftsList lofts={lofts} isAdmin={session.user.role === "admin"} />
+        <LoftsList
+          lofts={lofts}
+          owners={owners}
+          zoneAreas={zoneAreas}
+          isAdmin={session.user.role === "admin"}
+        />
       </div>
     )
   } catch (error) {
+    console.error("Error fetching lofts page data:", error)
     return (
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Lofts</h1>
-          <p className="text-muted-foreground">Loading loft data...</p>
+          <p className="text-muted-foreground">
+            Could not load loft data. Please try again later.
+          </p>
         </div>
       </div>
     )

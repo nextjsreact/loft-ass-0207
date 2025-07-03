@@ -5,13 +5,22 @@ export async function ensureUsersTable() {
     throw new Error("Database connection not initialized");
   }
   try {
-    // Attempt to insert a dummy user to check if the table exists and is writable
-    const [, insertError] = await sql`
+    // Attempt to insert a dummy user to check if the table exists and is writable.
+    // This will throw an error if the table does not exist.
+    await sql`
       INSERT INTO users (email, password_hash, full_name) 
       VALUES ('dummy@example.com', 'dummy', 'Dummy')`;
 
-    if (insertError && insertError.message && insertError.message.includes('relation "users" does not exist')) {
-      // If the table does not exist, create it
+    // If the insert succeeds, clean up the dummy user.
+    try {
+      await sql`DELETE FROM users WHERE email = 'dummy@example.com'`;
+    } catch (deleteError) {
+      console.error("Error deleting dummy user:", deleteError);
+      // Not re-throwing, as this is a cleanup step. The main operation succeeded.
+    }
+  } catch (error: any) {
+    if (error.message && error.message.includes('relation "users" does not exist')) {
+      // If the table does not exist, create it.
       const createTableQuery = `
         CREATE TABLE users (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -27,21 +36,18 @@ export async function ensureUsersTable() {
           updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
       `;
-      await sql.unsafe(createTableQuery);
-      console.log("Table 'users' created successfully.");
-    } else if (insertError) {
-      // For other insertion errors, log them
-      console.error("Error inserting dummy user:", insertError);
+      try {
+        await sql.unsafe(createTableQuery);
+        console.log("Table 'users' created successfully.");
+      } catch (createError) {
+        console.error("Error creating table 'users':", createError);
+        throw createError; // If creation fails, it's a critical error.
+      }
+    } else {
+      // For other insertion errors, log them and re-throw.
+      console.error("Error ensuring users table exists:", error);
+      throw error;
     }
-
-    // Clean up the dummy user
-    const [, deleteError] = await sql`DELETE FROM users WHERE email = 'dummy@example.com'`;
-    if (deleteError) {
-      console.error("Error deleting dummy user:", deleteError);
-    }
-  } catch (error) {
-    console.error("Error ensuring users table exists:", error);
-    throw error;
   }
 }
 
