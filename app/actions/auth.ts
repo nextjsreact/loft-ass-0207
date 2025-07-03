@@ -19,7 +19,8 @@ export async function ensureUsersTable() {
       // Not re-throwing, as this is a cleanup step. The main operation succeeded.
     }
   } catch (error: any) {
-    if (error.message && error.message.includes('relation "users" does not exist')) {
+    // undefined_table
+    if (error.code === '42P01') {
       // If the table does not exist, create it.
       const createTableQuery = `
         CREATE TABLE users (

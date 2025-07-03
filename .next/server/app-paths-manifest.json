@@ -1,9 +1,0 @@
-{
-  "/api/currencies/route": "app/api/currencies/route.js",
-  "/lofts/[id]/edit/page": "app/lofts/[id]/edit/page.js",
-  "/lofts/[id]/page": "app/lofts/[id]/page.js",
-  "/tasks/page": "app/tasks/page.js",
-  "/tasks/new/page": "app/tasks/new/page.js",
-  "/transactions/page": "app/transactions/page.js",
-  "/transactions/new/page": "app/transactions/new/page.js"
-}
